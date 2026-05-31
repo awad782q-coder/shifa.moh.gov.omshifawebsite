@@ -22,22 +22,6 @@
       background: #e5e7eb;
     }
 
-    .viewer {
-      width: 100%;
-      min-height: 100vh;
-      background: #e5e7eb;
-      padding: 0;
-      margin: 0;
-    }
-
-    .pdf-frame {
-      width: 100%;
-      height: 100vh;
-      border: none;
-      display: block;
-      background: white;
-    }
-
     .error-message {
       max-width: 600px;
       margin: 80px auto;
@@ -53,7 +37,7 @@
 </head>
 
 <body>
-  <main id="viewer" class="viewer"></main>
+  <main id="viewer"></main>
 
   <script>
     const SUPABASE_URL = "https://kxkkoadoybxhdoxqmeqj.supabase.co";
@@ -92,8 +76,15 @@
 
       document.title = file.name;
 
-      showPdfNative(file.public_url);
       increaseVisits(file);
+
+      /*
+        هذا هو الحل المهم:
+        نفتح ملف PDF الأصلي مباشرة.
+        لا Canvas، لا iframe، لا تحويل.
+        هذا يعطي أفضل عرض ممكن حسب قارئ PDF في الجهاز.
+      */
+      window.location.replace(file.public_url);
     }
 
     async function increaseVisits(file) {
@@ -103,20 +94,6 @@
         .from(TABLE_NAME)
         .update({ visits: nextVisits })
         .eq("id", file.id);
-    }
-
-    function showPdfNative(pdfUrl) {
-      const viewer = document.getElementById("viewer");
-
-      const cleanUrl = pdfUrl + "#toolbar=0&navpanes=0&scrollbar=1&view=FitH";
-
-      viewer.innerHTML = `
-        <iframe
-          class="pdf-frame"
-          src="${cleanUrl}"
-          title="PDF Viewer"
-        ></iframe>
-      `;
     }
 
     function showError(text) {
